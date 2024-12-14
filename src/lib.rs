@@ -33,7 +33,7 @@ use stylus_sdk::{alloy_primitives::U256, msg, prelude::*};
 sol_storage! {
     #[entrypoint]
     pub struct EventDB {
-        mapping(U256=>Event) events;
+        mapping(uint256 => Event) events;
         uint256 num_of_event;
     }
 
@@ -53,7 +53,7 @@ sol_storage! {
 /// Declare that `Counter` is a contract with the following external methods.
 #[public]
 impl EventDB {
-    pub fn CreateEvent(&mut self, title: String, description: String, date: String) {
+    pub fn create_event(&mut self, title: String, description: String, date: String) {
         let num = self.num_of_event.get();
         let mut new_event = self.events.setter(num);
         new_event.owner.set(msg::sender());
@@ -62,20 +62,35 @@ impl EventDB {
         new_event.date.set_str(date);
         self.num_of_event.set(num + U256::from(1));
         format!(
-            "
-                
-            ",
+            "{{\"title\":\"{}\",\"description\":\"{}\",\"date\":\"{}\",\"date\":\"{}\"}}",
             new_event.title.get_string(),
             new_event.description.get_string(),
             new_event.date.get_string(),
+            new_event.id.get(),
         );
     }
 
-    pub fn ListEvents(self) {
+    pub fn list_all(&self) {
         let mut response = String::from("[");
-        let max = self.num_of_event.get();
-        // for i in 0..self.
-        reponse.push_str("]");
+        let max_str = self.num_of_event.to_string();
+        let max = max_str.parse().unwrap();
+        for i in 0..max {
+            let event = self.events.get(U256::from(i));
+            let str = format!(
+                "{{\"title\":\"{}\",\"description\":\"{}\",\"date\":\"{}\",\"date\":\"{}\"}},",
+                event.title.get_string(),
+                event.description.get_string(),
+                event.date.get_string(),
+                event.id.get(),
+            );
+            response.push_str(str.as_str());
+            if i != max {
+                response.push_str(",");
+            }
+        }
+        response.push_str("]");
+
+        response;
     }
     pub fn Event($mut self, id: uint256){
 
