@@ -26,27 +26,51 @@
 extern crate alloc;
 
 /// Import items from the SDK. The prelude contains common traits and macros.
-use stylus_sdk::{alloy_primitives::U256, prelude::*};
+use stylus_sdk::{alloy_primitives::U256, msg, prelude::*};
 
 // Define some persistent storage using the Solidity ABI.
 // `Counter` will be the entrypoint.
 sol_storage! {
     #[entrypoint]
-    pub struct QrCodeDB {
-        mapping(U256=>Code) codes;
+    pub struct EventDB {
+        mapping(U256=>Event) events;
+        uint256 num_of_event;
     }
 
-    pub struct Code{
+    pub struct Event{
         address owner;
-        string content;
-        string color;
-        string style;
-        string background;
+        string title;
+        string description;
+        string date;
+        mapping(U256=>address) attendees;
     }
 }
 
 /// Declare that `Counter` is a contract with the following external methods.
 #[public]
-impl QrCodeDB {
-    pub fn Create(&mut self, content: String, color: String, background: String, style: String) {}
+impl EventDB {
+    pub fn CreateEvent(&mut self, title: String, description: String, date: String) {
+        let num = self.num_of_event.get();
+        let mut new_event = self.events.setter(num);
+        new_event.owner.set(msg::sender());
+        new_event.title.set_str(title);
+        new_event.description.set_str(description);
+        new_event.date.set_str(date);
+        self.num_of_event.set(num + U256::from(1));
+        format!(
+            "
+                
+            ",
+            new_event.title.get_string(),
+            new_event.description.get_string(),
+            new_event.date.get_string(),
+        );
+    }
+
+    pub fn ListEvents(self) {
+        let mut response = String::from("[");
+        let max = self.num_of_event.get();
+        // for i in 0..self.
+        reponse.push_str("]");
+    }
 }
