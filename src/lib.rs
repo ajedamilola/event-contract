@@ -42,7 +42,9 @@ sol_storage! {
         string title;
         string description;
         string date;
+        uint256 id;
         mapping(uint256=>Attendees) attendees;
+        uint256 num_of_attendees;
     }
     pub struct Attendees{
         uint256 id;
@@ -92,17 +94,17 @@ impl EventDB {
 
         response;
     }
-    pub fn Event($mut self, id: uint256){
+    pub fn get_event(&mut self, id: U256) {}
 
+    pub fn register_event(&mut self, id: U256, name: String) {
+        let mut event = self.events.setter(id);
+        let num = event.num_of_attendees.get();
 
-    }
-    pub fn RegisterEvent($mut self, id:uint256, name:String){
-        // let event = self.nujevents.get(id)
-        let num = self.num_of_event.get()
+        let mut new_attendee = event.attendees.setter(num);
+        new_attendee.id.set(num);
+        new_attendee.name.set_str(name);
+        event.num_of_attendees.set(num + U256::from(1));
 
-       let mut newAttendee =  event.attendees.setter(num + U256::from(1))
-       newAttendee.id.set(id)
-       newAttendee.name.set(name)
-    //    self.num_of_event.set(num + U256::from(1));
+        true;
     }
 }
